@@ -1,0 +1,27 @@
+services:
+  n8n:
+    image: n8nio/n8n:latest
+    container_name: n8n-fisioterapia
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - GENERIC_TIMEZONE=America/La_Paz
+      - TZ=America/La_Paz
+      # Variables que el workflow usa en sus Code/HTTP nodes
+      - BRIDGE_URL=http://host.docker.internal:3003
+      - BRIDGE_API_KEY=${BRIDGE_API_KEY}
+      - CLINICA_N8N_URL=http://host.docker.internal:3000
+      - N8N_API_KEY=${N8N_API_KEY}
+    volumes:
+      - n8n_data:/home/node/.n8n
+    extra_hosts:
+      # Permite a n8n llegar al bridge y a clinica corriendo en el host
+      - "host.docker.internal:host-gateway"
+
+volumes:
+  n8n_data:
+    name: n8n-fisioterapia-data
