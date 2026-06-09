@@ -29,6 +29,7 @@ export class ChatbotService {
             '¡Bienvenido al Centro de Rehabilitación Cyborg!\nPor favor, ingresa tu número de *Carnet de Identidad (CI)* para iniciar tu reserva.'
           );
           this.estadoService.guardar(telefono, { estado: 'ESPERANDO_CI', datos });
+          await this.emitirLogBi(telefono, 'iniciado', 'inicio_conversacion', {});
           break;
 
         case 'ESPERANDO_CI':
@@ -125,9 +126,12 @@ export class ChatbotService {
             const personaRef = { nombre: datos.nombre, email: datos.email };
             await this.notificarExito(telefono, personaRef, evaluacion);
             
+            await this.emitirLogBi(telefono, 'completado', 'reserva_confirmada', { ...datos, fecha: fechaValidada.toISOString(), evaluacionId: evaluacion.id });
+            
           } catch (e) {
             this.logger.error(`Error al agendar cita: ${e.message}`);
             await this.whatsappService.enviarTexto(telefono, '❌ Ocurrió un error al intentar agendar tu cita. Por favor, intenta nuevamente más tarde o comunícate con recepción.');
+            await this.emitirLogBi(telefono, 'fallido', 'creando_reserva', datos, e.message);
           } finally {
             this.estadoService.eliminar(telefono);
           }
@@ -143,6 +147,7 @@ export class ChatbotService {
     } catch (error) {
       this.logger.error(`Error procesando estado ${estado}: ${error.message}`);
       await this.whatsappService.enviarTexto(telefono, 'Disculpa, tuvimos un problema de conexión. ¿Podrías repetirlo?');
+      await this.emitirLogBi(telefono, 'error_critico', estado, datos, error.message);
     }
   }
 
@@ -213,6 +218,31 @@ export class ChatbotService {
       } catch (e) {
         this.logger.warn(`No se pudo enviar el correo a ${persona.email}: ${e.message}`);
       }
+    }
+  }
+
+  private async emitirLogBi(telefono: string, estadoLog: string, pasoActual: string, datosRecopilados: any, error?: string) {
+    try {
+      const url = process.env.BI_AUTOMATIZACION_URL || 'http://localhost:8000/api';
+      const body = {
+        numero_whatsapp: telefono.includes('@') ? telefono.split('@')[0] : telefono,
+        paso_actual: pasoActual,
+        estado: estadoLog,
+        datos_recopilados: datosRecopilados,
+        error: error || null,
+      };
+
+      const res = await fetch(`${url}/bi-automatizacion/logs/automatizacion/`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      
+      if (!res.ok) {
+        this.logger.warn(`Error al enviar log a BI: ${res.statusText}`);
+      }
+    } catch (e) {
+      this.logger.warn(`No se pudo enviar log a BI: ${e.message}`);
     }
   }
 }
