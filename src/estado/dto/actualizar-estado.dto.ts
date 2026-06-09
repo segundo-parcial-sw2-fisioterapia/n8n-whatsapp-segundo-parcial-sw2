@@ -1,6 +1,6 @@
 import { IsIn, IsNotEmpty, IsObject, IsString } from 'class-validator';
 
-export const ESTADOS_VALIDOS = ['INICIO', 'NOMBRE', 'CI', 'TELEFONO', 'EMAIL', 'MOTIVO', 'HORARIO'] as const;
+export const ESTADOS_VALIDOS = ['INICIO', 'ESPERANDO_CI', 'ESPERANDO_NOMBRE', 'ESPERANDO_APELLIDO', 'ESPERANDO_EMAIL', 'CONFIRMAR_CITA', 'ESPERANDO_FECHA_HORA'] as const;
 export type EstadoConversacion = (typeof ESTADOS_VALIDOS)[number];
 
 /** Payload que envía n8n para actualizar el estado de una conversación */
