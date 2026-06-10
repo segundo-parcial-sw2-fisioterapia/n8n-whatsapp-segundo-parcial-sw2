@@ -7,8 +7,5 @@ npm-debug.log
 *.md
 .prettierrc
 eslint.config.mjs
-nest-cli.json
-tsconfig.build.json
-tsconfig.json
 workflows
 docker-compose.yml
