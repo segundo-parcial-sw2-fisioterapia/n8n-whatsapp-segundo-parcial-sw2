@@ -20,7 +20,8 @@ services:
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://18.223.0.133:5678 # <-- Tu IP de AWS colocada automáticamente
+      # Hacemos la IP dinámica: si no hay PUBLIC_IP en el .env, usa localhost (para tu PC local)
+      - WEBHOOK_URL=http://${PUBLIC_IP:-localhost}:5678
       - GENERIC_TIMEZONE=America/La_Paz
       - TZ=America/La_Paz
       # Comunicación con el Bridge (usa el nombre del contenedor en la misma red)
