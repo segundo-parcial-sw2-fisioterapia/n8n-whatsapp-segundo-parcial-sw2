@@ -1,6 +1,6 @@
 services:
   api-bridge:
-    build: .
+    image: willxd123/api-bridge-sw2:latest # <-- Imagen ya construida
     container_name: api-bridge-sw2
     restart: unless-stopped
     ports:
@@ -17,11 +17,10 @@ services:
       - "5678:5678"
     environment:
       # Para que reciba webhooks públicos y genere bien las URLs:
-      # (Cambia TU_IP_PUBLICA por la IP real de tu VPS en producción)
       - N8N_HOST=0.0.0.0
       - N8N_PORT=5678
       - N8N_PROTOCOL=http
-      - WEBHOOK_URL=http://TU_IP_PUBLICA:5678
+      - WEBHOOK_URL=http://18.223.0.133:5678 # <-- Tu IP de AWS colocada automáticamente
       - GENERIC_TIMEZONE=America/La_Paz
       - TZ=America/La_Paz
       # Comunicación con el Bridge (usa el nombre del contenedor en la misma red)
